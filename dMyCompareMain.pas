@@ -19,7 +19,6 @@ type
     btnRightPaste: TButton;
     OpenDialog1: TOpenDialog;
     StatusBar1: TStatusBar;
-    cbxOpenNewNC: TCheckBox;
     pnlLeftTop: TPanel;
     edLeftFilename: TEdit;
     Panel1: TPanel;
@@ -38,6 +37,7 @@ type
     bDebug: Boolean;
     FExternalCompare: String;
     FCmdLine: String;
+    FAdditionalCmdLineOption: String;
     FNCWindowName: String;
     FNCClassName: String;
     FLeftFilename: String;
@@ -67,7 +67,10 @@ var
   procedure OpenNC;
   begin
     sTemp := Format(FCmdLine, [sTempLeft, sTempRight]);
+    if (Length(Trim(FAdditionalCmdLineOption))>0) then
+      sTemp := Format('%s %s', [FAdditionalCmdLineOption, sTemp]);
     OutputDebugString(pChar(sTemp));
+    StatusBar1.SimpleText := sTemp;
     ShellExecute(Handle, 'open', pAnsiChar(FExternalCompare), pAnsiChar(sTemp), nil, SW_SHOWNORMAL);
   end;
 begin
@@ -75,7 +78,7 @@ begin
   begin
     if (Length(OpenDialog1.InitialDir) = 0) OR (NOT DirectoryExists(OpenDialog1.InitialDir)) then
       OpenDialog1.InitialDir := ExtractFileDir(Application.Exename);
-    OpenDialog1.Title := 'Browse for Norton Compare';
+    OpenDialog1.Title := 'Browse for Compare Utility';
     if OpenDialog1.Execute then
     begin
       FExternalCompare := OpenDialog1.Filename;
@@ -92,37 +95,16 @@ begin
     end;
     sLeft := Format('%s%s', [sTempdir, FLeftFilename]);
     sRight := Format('%s%s', [sTempDir, FRightFilename]);
-    if cbxOpenNewNC.Checked then
-    begin
-      sLeft := Format('%s%s', [sTempdir, edLeftFilename.Text]);
-      sRight := Format('%s%s', [sTempDir, edRightFilename.Text]);
-      if FileExists(sLeft) then
-      begin
-        MessageDlg('Left filename exists. Rename!', mtError, [mbOk], 0);
-        exit;
-      end;
-      if FileExists(sRight) then
-      begin
-        MessageDlg('Right filename exists. Rename!', mtError, [mbOk], 0);
-        exit;
-      end;
-    end;
 
-// C:\Utilities\NC Compare\NCOMPARE.EXE "%s" "%t"
     sTempLeft := sLeft; //Format('%s%s', [sTempdir, edLeftFilename.Text]);
     lstDeleteFiles.Add(sTempLeft);
     edLeft.Lines.SaveToFile(sTempLeft);
     sTempRight := sRight; //Format('%s%s', [sTempDir, edRightFilename.Text]);
     lstDeleteFiles.Add(sTempRight);
     edRight.Lines.SaveToFile(sTempRight);
-    if NOT cbxOpenNewNC.Checked then
-    begin
-      lstWindowInfo.Clear;
-      CloseWindowsList(lstWindowInfo);
-      if lstWindowInfo.Count = 0 then
-        OpenNC;
-    end
-    else
+    lstWindowInfo.Clear;
+    CloseWindowsList(lstWindowInfo);
+    if lstWindowInfo.Count = 0 then
       OpenNC;
   end;
 
@@ -152,17 +134,22 @@ procedure TdlgMyCompareMain.FormCreate(Sender: TObject);
 var
   fIni: TIniFile;
 begin
-  FNCWindowName := 'Norton File Compare';
-  FNCClassName := 'Afx:400000:b:10013:6:1e1159';
+  FNCWindowName := '';// 'Norton File Compare';
+  FNCClassName := ''; //'Afx:400000:b:10013:6:1e1159';
   FLeftFilename := 'Left.txt';
   FRightFilename := 'Right.txt';
-  FCmdLine := '"%s" "%s"';
+  FCmdLine :='"%s" "%s"';
   fIni := TIniFile.Create(ChangeFileExt(Application.exename, '.ini'));
-  bDebug := fIni.ReadBool('Debug', 'Enable', True);
+  bDebug := False; //fIni.ReadBool('Debug', 'Enable', True);
   FExternalCompare :=  fIni.ReadString('External Compare Utility', 'ExeName', '');
   FCmdLine := fIni.ReadString('External Compare Utility', 'CmdLine', FCmdLine);
-  FNCWindowName := fini.ReadString('External Compare Utility', 'WindowName', FNCWindowName);
-  FNCClassName := fIni.ReadString('External Compare Utility', 'ClassName', FNCClassName);
+  // seems to loose them when reading...
+  if ((Pos('"', FCmdLine)>0) AND (Pos('"', FCmdLine)>1)) then
+      FCmdLine := Format('"%s"', [FCmdLine]);
+
+  FAdditionalCmdLineOption := Fini.ReadString('External Compare Utility', 'AdditionalCmdLineOption', FAdditionalCmdLineOption);
+//  FNCWindowName := fini.ReadString('External Compare Utility', 'WindowName', FNCWindowName);
+//  FNCClassName := fIni.ReadString('External Compare Utility', 'ClassName', FNCClassName);
   FLeftFilename := fIni.ReadString('External Compare Utility', 'LeftFilename', FLeftFilename);
   FRightFilename := fIni.ReadString('External Compare Utility', 'RightFilename', FRightFilename);
   FreeAndNil(fIni);
@@ -181,11 +168,12 @@ var
   fIni: TIniFile;
 begin
   fIni := TIniFile.Create(ChangeFileExt(Application.exename, '.ini'));
-  fIni.WriteBool('Debug', 'Enable', bDebug);
+  // Not used // fIni.WriteBool('Debug', 'Enable', bDebug);
   fIni.WriteString('External Compare Utility', 'ExeName', FExternalCompare);
-// Have had problems writing. Loses double quotes...  fIni.WriteString('External Compare Utility', 'CmdLine', FCmdLine);
-  fini.WriteString('External Compare Utility', 'WindowName', FNCWindowName);
-  fIni.WriteString('External Compare Utility', 'ClassName', FNCClassName);
+ // if (Length(Trim(FCmdLine))=0) then
+    fIni.WriteString('External Compare Utility', 'CmdLine', FCmdLine);
+  if (Length(Trim(FAdditionalCmdLineOption))=0) then // don't write it back will lose parentheses
+    fIni.WriteString('External Compare Utility', 'AdditionalCmdLineOption', FAdditionalCmdLineOption);
   fIni.WriteString('External Compare Utility', 'LeftFilename', FLeftFilename);
   fIni.WriteString('External Compare Utility', 'RightFilename', FRightFilename);
   FreeAndNil(fIni);
@@ -264,6 +252,10 @@ var
   t: Integer;
   sWTemp, sCTemp: String;
 begin
+
+  if (Length(FNCWindowName)=0) then exit;
+  if (Length(FNCClassName)=0) then exit;
+
   MyEnumAllWindows(lstWindowInfo);
   for t:=Pred(lstWindowInfo.Count) downto 0 do
   begin

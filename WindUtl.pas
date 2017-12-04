@@ -121,8 +121,6 @@ begin
     result := Format('< %s > - "%s"', [FParentWindow, result]);
 end;
 
-
-
 function TWindowInfoList.GetHandle(iIndex: Integer): THandle;
 begin
   result := (Items[iIndex] as TOWindowInfo).FHandle;
@@ -256,18 +254,6 @@ Begin
   //Application.ProcessMessages; //MyProcessMessages;
 
 end; //function MyEnumChildWinProc(Handle: HWnd; {lParam: LParam): Bool; //} lstWindowInfo: TWindowInfoList): Boolean;
-
-
-
-
-
-
-
-
-
-
-
-
 
 function MyEnumWinProc(Handle: HWnd; {lParam: LParam): Bool; //} lstWindowInfo: TWindowInfoList): Boolean;
 Var

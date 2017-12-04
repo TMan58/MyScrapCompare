@@ -1,9 +1,9 @@
 object dlgMyCompareMain: TdlgMyCompareMain
   Left = 349
   Top = 136
-  Width = 880
-  Height = 640
   Caption = 'MyScrap Compare Utility'
+  ClientHeight = 601
+  ClientWidth = 864
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,12 +21,13 @@ object dlgMyCompareMain: TdlgMyCompareMain
     Left = 420
     Top = 0
     Width = 5
-    Height = 545
+    Height = 540
+    ExplicitHeight = 545
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 545
-    Width = 872
+    Top = 540
+    Width = 864
     Height = 61
     Align = alBottom
     TabOrder = 0
@@ -60,31 +61,23 @@ object dlgMyCompareMain: TdlgMyCompareMain
     object StatusBar1: TStatusBar
       Left = 1
       Top = 41
-      Width = 870
+      Width = 862
       Height = 19
       Panels = <>
-    end
-    object cbxOpenNewNC: TCheckBox
-      Left = 288
-      Top = 16
-      Width = 241
-      Height = 17
-      Caption = 'Open a &new Norton Compare'
-      TabOrder = 3
     end
   end
   object pnlLeft: TPanel
     Left = 0
     Top = 0
     Width = 420
-    Height = 545
+    Height = 540
     Align = alLeft
     TabOrder = 1
     object edLeft: TMemo
       Left = 1
       Top = 33
       Width = 418
-      Height = 511
+      Height = 506
       Align = alClient
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -124,15 +117,15 @@ object dlgMyCompareMain: TdlgMyCompareMain
   object pnlRight: TPanel
     Left = 425
     Top = 0
-    Width = 447
-    Height = 545
+    Width = 439
+    Height = 540
     Align = alClient
     TabOrder = 2
     object edRight: TMemo
       Left = 1
       Top = 33
-      Width = 445
-      Height = 511
+      Width = 437
+      Height = 506
       Align = alClient
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -148,13 +141,13 @@ object dlgMyCompareMain: TdlgMyCompareMain
     object Panel1: TPanel
       Left = 1
       Top = 1
-      Width = 445
+      Width = 437
       Height = 32
       Align = alTop
       BevelInner = bvLowered
       TabOrder = 1
       DesignSize = (
-        445
+        437
         32)
       object edRightFilename: TEdit
         Left = 4
